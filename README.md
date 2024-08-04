@@ -33,7 +33,7 @@ Se você quer entrar nessa de renomear arquivos em massa e dividir PDFs, segue o
 3. **Rode o App:** Entre na pasta do projeto e execute o arquivo principal:
 
    ```bash
-   python renomear_arquivo.py
+   python main.py
    ```
 
 4. **Use a Interface:** Selecione os arquivos que quer renomear, insira os novos nomes em um arquivo .TXT pulando linhas para separar os diferentes nomes e escolha onde salvar. Para dividir PDFs, selecione os arquivos PDF que deseja dividir e escolha a pasta de saída.
