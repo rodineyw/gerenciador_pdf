@@ -1,0 +1,85 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+# Usually the folder where PyInstaller builds the project
+bin/
+# The build folder used by PyInstaller
+build/
+# PyInstaller log file
+*.log
+
+# Inno Setup
+executavel.iss
+
+# Installer logs
+*.egg-info/
+pip-wheel-metadata/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pytest
+.cache
+
+# pyenv
+.python-version
+
+# virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+
+# Visual Studio Code
+.vscode/
+
+# IntelliJ / PyCharm
+.idea/
+
+# Backup files
+*.bak
+
+# Other files and folders to ignore
+.DS_Store
+Thumbs.db
+cnab.pdf
+exemplo/
+dist/
+build/
