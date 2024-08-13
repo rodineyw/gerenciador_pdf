@@ -1,7 +1,8 @@
-from PyPDF2 import PdfReader
+from PyPDF2 import PdfReader, PdfWriter
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QListWidget,
-    QFileDialog, QMessageBox, QProgressBar, QApplication, QLineEdit
+    QFileDialog, QMessageBox, QProgressBar, QApplication, QLineEdit, QListWidgetItem, QInputDialog
 )
 from .pdf_utils import dividir_pdf, mesclar_pdfs, renomear_com_texto
 
@@ -23,13 +24,14 @@ class GerenciadorPdf(QWidget):
 
         self.progress_bar = QProgressBar(self)
         self.layout.addWidget(self.progress_bar)
-        
-        self.label = QLabel("Número de Páginas: 0")
-        self.layout.addWidget(self.label)
 
         self.botao_selecionar = QPushButton("Selecionar Arquivos", self)
         self.botao_selecionar.clicked.connect(self.selecionar_arquivos)
         self.layout.addWidget(self.botao_selecionar)
+        
+        self.remove_page_button = QPushButton("Remover Página", self)
+        self.remove_page_button.clicked.connect(self.remove_page)
+        self.layout.addWidget(self.remove_page_button)
 
         self.pages_per_file_label = QLabel("Páginas por Arquivo:", self)
         self.layout.addWidget(self.pages_per_file_label)
@@ -62,15 +64,59 @@ class GerenciadorPdf(QWidget):
         )
         if files:
             self.lista_arquivos.clear()
-            self.lista_arquivos.addItems(files)
-            page_count = self.get_pdf_page_count(files[0])
-            self.label.setText(f"Número de Páginas: {page_count}")
+            for file in files:
+                page_count = self.get_pdf_page_count(file)
+                item_text = f"{file.split('/')[-1]} - Páginas: {page_count}"
+                item = QListWidgetItem(item_text)
+                item.setData(Qt.ItemDataRole.UserRole, (file, page_count))
+                self.lista_arquivos.addItem(item)
+
+
             
             
     def get_pdf_page_count(self, pdf_path):
         with open(pdf_path, 'rb') as f:
             pdf = PdfReader(f)
             return len(pdf.pages)
+        
+        
+    def remove_page(self):
+        selected_item = self.lista_arquivos.currentItem()
+        if selected_item:
+            file_path, page_count = selected_item.data(Qt.ItemDataRole.UserRole)
+            self.remove_page_from_pdf(file_path)
+
+
+    def remove_page_from_pdf(self, file_path):
+        reader = PdfReader(file_path)
+        writer = PdfWriter()
+
+        pages_to_keep = list(range(len(reader.pages)))
+
+        # Solicitar as páginas para remover
+        pages_to_remove, ok = QInputDialog.getText(
+            self, "Remover Páginas", "Número das páginas que deseja remover (separadas por vírgula):"
+        )
+        
+        if ok and pages_to_remove:
+            try:
+                # Converter a string de entrada em uma lista de números de página
+                pages_to_remove = [int(page.strip()) - 1 for page in pages_to_remove.split(",")]
+
+                # Remover as páginas especificadas
+                pages_to_keep = [i for i in pages_to_keep if i not in pages_to_remove]
+
+                for i in pages_to_keep:
+                    writer.add_page(reader.pages[i])
+
+                new_file_path = file_path.replace(".pdf", "_editado.pdf")
+                with open(new_file_path, "wb") as f:
+                    writer.write(f)
+
+                QMessageBox.information(self, "Sucesso", f"As páginas {pages_to_remove} foram removidas com sucesso!\nNovo arquivo salvo como {new_file_path}")
+            
+            except ValueError:
+                QMessageBox.warning(self, "Erro", "Por favor, insira números de página válidos separados por vírgula.")
         
 
     def dividir_pdfs(self):
