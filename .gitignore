@@ -83,3 +83,6 @@ cnab.pdf
 exemplo/
 dist/
 build/
+.pyc
+.venv
+venv

@@ -16,7 +16,7 @@ if sys.platform == "win32":
     base = "Win32GUI"
 
 setup(
-    name="GerenciadorPDF",
+    name="Gerenciador PDF",
     version="0.2",
     description="Gerenciador de Arquivos PDF",
     options={"build_exe": build_exe_options},
