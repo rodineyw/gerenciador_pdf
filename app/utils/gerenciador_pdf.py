@@ -1,4 +1,4 @@
-import pandas as pd
+from PyPDF2 import PdfReader
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QListWidget,
     QFileDialog, QMessageBox, QProgressBar, QApplication, QLineEdit
@@ -23,6 +23,9 @@ class GerenciadorPdf(QWidget):
 
         self.progress_bar = QProgressBar(self)
         self.layout.addWidget(self.progress_bar)
+        
+        self.label = QLabel("Número de Páginas: 0")
+        self.layout.addWidget(self.label)
 
         self.botao_selecionar = QPushButton("Selecionar Arquivos", self)
         self.botao_selecionar.clicked.connect(self.selecionar_arquivos)
@@ -60,6 +63,15 @@ class GerenciadorPdf(QWidget):
         if files:
             self.lista_arquivos.clear()
             self.lista_arquivos.addItems(files)
+            page_count = self.get_pdf_page_count(files[0])
+            self.label.setText(f"Número de Páginas: {page_count}")
+            
+            
+    def get_pdf_page_count(self, pdf_path):
+        with open(pdf_path, 'rb') as f:
+            pdf = PdfReader(f)
+            return len(pdf.pages)
+        
 
     def dividir_pdfs(self):
         pasta_saida = QFileDialog.getExistingDirectory(
