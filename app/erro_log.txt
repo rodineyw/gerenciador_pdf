@@ -1,0 +1,15 @@
+Ocorreu um erro inesperado:
+Traceback (most recent call last):
+  File "C:\Users\rodiney.nascimento\OneDrive - PEREZ DE REZENDE ADVOCACIA\Documentos\Python Scripts\rename\app\main.py", line 21, in <module>
+    main()
+  File "C:\Users\rodiney.nascimento\OneDrive - PEREZ DE REZENDE ADVOCACIA\Documentos\Python Scripts\rename\app\main.py", line 14, in main
+    window = GerenciadorPdf()
+             ^^^^^^^^^^^^^^^^
+  File "C:\Users\rodiney.nascimento\OneDrive - PEREZ DE REZENDE ADVOCACIA\Documentos\Python Scripts\rename\app\utils\gerenciador_pdf.py", line 14, in __init__
+    self.init_ui()
+  File "C:\Users\rodiney.nascimento\OneDrive - PEREZ DE REZENDE ADVOCACIA\Documentos\Python Scripts\rename\app\utils\gerenciador_pdf.py", line 18, in init_ui
+    self.setup_widgets()
+  File "C:\Users\rodiney.nascimento\OneDrive - PEREZ DE REZENDE ADVOCACIA\Documentos\Python Scripts\rename\app\utils\gerenciador_pdf.py", line 44, in setup_widgets
+    self.botao_dividir.clicked.connect(self.dividir_pdfs)
+                                       ^^^^^^^^^^^^^^^^^
+AttributeError: 'GerenciadorPdf' object has no attribute 'dividir_pdfs'
