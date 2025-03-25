@@ -108,9 +108,9 @@ def renomear_com_texto(lista_arquivos, arquivo_nomes):
 
 def comprimir_pdf(file_path, output_path):
     try:
-        pdf = fitz.open(file_path)
-        # Salvar o PDF com compressão
-        pdf.save(output_path, deflate=True)
+        with Pdf.open(file_path) as pdf:
+        # remove objetos não utilizados (compressão estrutural)
+            pdf.save(output_path, optimize_version=True)
         print(f"Arquivo comprimido salvo como {output_path}")
     except Exception as e:
         print(f"Ocorreu um erro ao comprimir o arquivo: {str(e)}")
