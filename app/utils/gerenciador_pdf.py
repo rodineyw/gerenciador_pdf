@@ -3,7 +3,7 @@ from PyPDF2 import PdfReader, PdfWriter
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QListWidget,
-    QFileDialog, QMessageBox, QProgressBar, QApplication, QLineEdit, QListWidgetItem, QInputDialog, QCheckBox
+    QFileDialog, QMessageBox, QProgressBar, QApplication, QLineEdit, QListWidgetItem, QInputDialog, QCheckBox, QSlider
 )
 from .pdf_utils import dividir_pdf, mesclar_pdfs, renomear_com_texto, comprimir_pdf
 
@@ -52,6 +52,17 @@ class GerenciadorPdf(QWidget):
         # Checkbo para reduzir imagem
         self.checkbox_reduzir_imagem = QCheckBox("Reduzir qualidade das imagens", self)
         self.layout.addWidget(self.checkbox_reduzir_imagem)
+        
+        # Slider para escolher a qualidade
+        self.slider_qualidade = QSlider(Qt.Orientation.Horizontal)
+        self.slider_qualidade.setMinimum(10)
+        self.slider_qualidade.setMaximum(95)
+        self.slider_qualidade.setValue(75)
+        self.slider_qualidade.setTickInterval(5)
+        self.slider_qualidade.setTickPosition(QSlider.TickPosition.TicksBelow)
+        self.layout.addWidget(QLabel("Qualidade das imagens (quanto menor, mais comprimido):"))
+        self.layout.addWidget(self.slider_qualidade)
+
         
         # Botão de compressão
         self.compress_button = QPushButton('Comprimir e Salvar', self)
@@ -109,7 +120,8 @@ class GerenciadorPdf(QWidget):
                 file_path=pdf_path,
                 output_path=save_path,
                 reduzir_imagem=reduzir,
-                qualidade=75
+                qualidade=self.slider_qualidade.value()
+
             )
 
             if original is None or final is None:

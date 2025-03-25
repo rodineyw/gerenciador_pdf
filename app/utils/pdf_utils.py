@@ -121,27 +121,31 @@ def comprimir_pdf(file_path, output_path, reduzir_imagem=False, qualidade=75):
                 images = page.get_images(full=True)
                 for img in images:
                     xref = img[0]
-                    base_image = doc.extract_image(xref)
-                    image_bytes = base_image["image"]
+                    try:
+                        base_image = doc.extract_image(xref)
+                        image_bytes = base_image["image"]
 
-                    image = Image.open(BytesIO(image_bytes))
-                    if image.mode != "RGB":
-                        image = image.convert("RGB")
+                        image = Image.open(BytesIO(image_bytes))
+                        if image.mode != "RGB":
+                            image = image.convert("RGB")
 
-                    img_io = BytesIO()
-                    image.save(img_io, format="JPEG", quality=qualidade, optimize=True)
-                    new_img_xref = doc.insert_image(page.rect, stream=img_io.getvalue())
-                    doc._delete_object(xref)  # remove imagem antiga
+                        img_io = BytesIO()
+                        image.save(img_io, format="JPEG", quality=qualidade, optimize=True)
+
+                        # Substitui o conteúdo original da imagem no xref
+                        doc.update_stream(xref, img_io.getvalue())
+
+                    except Exception as img_error:
+                        print(f"[!] Erro ao processar imagem xref {xref}: {img_error}")
+                        continue  # pula imagem ruim
 
         doc.save(output_path, deflate=True, garbage=4)
 
         tamanho_original = os.path.getsize(file_path)
         tamanho_final = os.path.getsize(output_path)
 
-        if tamanho_final >= tamanho_original:
-            print("⚠️ Compressão não resultou em redução de tamanho.")
-        else:
-            print("✅ Compressão realizada com sucesso!")
+        return tamanho_original, tamanho_final
 
     except Exception as e:
-        print(f"Erro na compressão: {str(e)}")
+        print(f"[ERRO] compressão falhou: {e}")
+        return None, None
