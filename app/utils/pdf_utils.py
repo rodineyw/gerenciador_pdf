@@ -1,9 +1,13 @@
 import os
 import fitz
+
+from PIL import Image
+from io import BytesIO
+from pikepdf import Pdf
+
 from PyQt6.QtCore import Qt
 from PyPDF2 import PdfWriter, PdfReader
 from PyPDF2.errors import EmptyFileError
-from pikepdf import Pdf
 
 
 def dividir_pdf(caminho_arquivo, pasta_saida, paginas_por_arquivo=2):
@@ -106,11 +110,30 @@ def renomear_com_texto(lista_arquivos, arquivo_nomes):
         print(f"Erro ao renomear arquivos: {str(e)}")
 
 
-def comprimir_pdf(file_path, output_path):
+def comprimir_pdf(file_path, output_path, qualidade=75, dpi=100):
     try:
-        with Pdf.open(file_path) as pdf:
-        # remove objetos não utilizados (compressão estrutural)
-            pdf.save(output_path, optimize_version=True)
-        print(f"Arquivo comprimido salvo como {output_path}")
+        doc = fitz.open(file_path)
+        for page_num in range(len(doc)):
+            page = doc[page_num]
+            images = page.get_images(full=True)
+            for img_index, img in enumerate(images):
+                xref = img[0]
+                base_images = doc.extract_image(xref)
+                image_bytes = base_image["image"]
+                
+                # Converter para JPEG com compressão
+                image = Image.open(BytesIO(image_bytes))
+                if image.mode != "RGB":
+                    image = image.convert("RGB")
+                    
+                img_io = BytesIO()
+                image.save(img_io, format="JPEG", quality=qualidade, optimize=True)
+                new_img_xref = doc.insert_image(page.rect, stream=img_io.getvalue())
+                
+                # Remove a imagem antiga
+                doc._delete_object(xref)
+                
+        doc.save(output_path, deflate=True, garbage=4)
+        print(f"Arquivo comprimido com sucesso em: {output_path}")
     except Exception as e:
-        print(f"Ocorreu um erro ao comprimir o arquivo: {str(e)}")
+        print(f"Erro na compressão: {str(e)}")
