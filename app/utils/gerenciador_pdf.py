@@ -3,9 +3,9 @@ from PyPDF2 import PdfReader, PdfWriter
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QListWidget,
-    QFileDialog, QMessageBox, QProgressBar, QApplication, QLineEdit, QListWidgetItem, QInputDialog
+    QFileDialog, QMessageBox, QProgressBar, QApplication, QLineEdit, QListWidgetItem, QInputDialog, QCheckBox
 )
-from .pdf_utils import dividir_pdf, mesclar_pdfs, renomear_com_texto
+from .pdf_utils import dividir_pdf, mesclar_pdfs, renomear_com_texto, comprimir_pdf
 
 
 class GerenciadorPdf(QWidget):
@@ -48,11 +48,17 @@ class GerenciadorPdf(QWidget):
         self.merge_button.clicked.connect(self.merge_pdfs)
         self.layout.addWidget(self.merge_button)
 
-        # Botão para comprimir o PDF
+        
+        # Checkbo para reduzir imagem
+        self.checkbox_reduzir_imagem = QCheckBox("Reduzir qualidade das imagens", self)
+        self.layout.addWidget(self.checkbox_reduzir_imagem)
+        
+        # Botão de compressão
         self.compress_button = QPushButton('Comprimir e Salvar', self)
         self.compress_button.clicked.connect(self.compress_pdf)
         self.layout.addWidget(self.compress_button)
 
+        # Botão renomear arquivo
         self.botao_renomear_arquivos = QPushButton(
             "Renomear Arquivos com TXT", self)
         self.botao_renomear_arquivos.clicked.connect(self.renomear_arquivos)
@@ -77,47 +83,61 @@ class GerenciadorPdf(QWidget):
             return len(pdf.pages)
 
     def compress_pdf(self):
-        # Verifica se há arquivos selecionados
         if self.lista_arquivos.count() == 0:
             QMessageBox.warning(self, "Erro", "Nenhum PDF selecionado.")
             return
 
-        # Seleciona o arquivo PDF da lista
         selected_item = self.lista_arquivos.currentItem()
         if not selected_item:
-            QMessageBox.warning(
-                self, "Erro", "Selecione um arquivo PDF da lista.")
+            QMessageBox.warning(self, "Erro", "Selecione um arquivo PDF da lista.")
             return
 
         pdf_path = selected_item.data(Qt.ItemDataRole.UserRole)[0]
 
-        # Seleciona o local para salvar o arquivo comprimido
         save_path, _ = QFileDialog.getSaveFileName(
             self, "Salvar PDF Comprimido", "", "PDF Files (*.pdf)"
         )
 
-        if save_path:
-            try:
-                # Comprimir o PDF (reescrever para reduzir o tamanho)
-                reader = PdfReader(pdf_path)
-                writer = PdfWriter()
+        if not save_path:
+            QMessageBox.warning(self, "Cancelado", "Ação de salvar foi cancelada.")
+            return
 
-                for page in reader.pages:
-                    writer.add_page(page)
+        reduzir = self.checkbox_reduzir_imagem.isChecked()
 
-                # Salvar o arquivo comprimido
-                with open(save_path, 'wb') as f:
-                    writer.write(f)
+        try:
+            original, final = comprimir_pdf(
+                file_path=pdf_path,
+                output_path=save_path,
+                reduzir_imagem=reduzir,
+                qualidade=75
+            )
 
+            if original is None or final is None:
+                raise Exception("Falha ao comprimir PDF")
+
+            original_mb = original / (1024 * 1024)
+            final_mb = final / (1024 * 1024)
+            diff = original_mb - final_mb
+
+            if diff <= 0:
+                QMessageBox.warning(
+                    self, "Aviso",
+                    f"O tamanho do PDF não foi reduzido.\n"
+                    f"Tamanho original: {original_mb:.2f} MB\n"
+                    f"Tamanho final: {final_mb:.2f} MB"
+                )
+            else:
                 QMessageBox.information(
-                    self, "Sucesso", f"PDF comprimido salvo em: {save_path}")
-            except Exception as e:
-                QMessageBox.critical(
-                    self, "Erro", f"Falha ao comprimir o PDF: {str(e)}")
-        else:
-            QMessageBox.warning(self, "Cancelado",
-                                "Ação de salvar foi cancelada.")
+                    self, "Sucesso",
+                    f"PDF comprimido com sucesso!\n"
+                    f"Tamanho original: {original_mb:.2f} MB\n"
+                    f"Tamanho final: {final_mb:.2f} MB\n"
+                    f"Redução: {diff:.2f} MB"
+                )
 
+        except Exception as e:
+            QMessageBox.critical(self, "Erro", f"Erro ao comprimir PDF: {str(e)}")
+    
     def remove_page(self):
         selected_item = self.lista_arquivos.currentItem()
         if selected_item:

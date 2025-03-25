@@ -110,30 +110,38 @@ def renomear_com_texto(lista_arquivos, arquivo_nomes):
         print(f"Erro ao renomear arquivos: {str(e)}")
 
 
-def comprimir_pdf(file_path, output_path, qualidade=75, dpi=100):
+def comprimir_pdf(file_path, output_path, reduzir_imagem=False, qualidade=75):
     try:
         doc = fitz.open(file_path)
-        for page_num in range(len(doc)):
-            page = doc[page_num]
-            images = page.get_images(full=True)
-            for img_index, img in enumerate(images):
-                xref = img[0]
-                base_images = doc.extract_image(xref)
-                image_bytes = base_image["image"]
-                
-                # Converter para JPEG com compressão
-                image = Image.open(BytesIO(image_bytes))
-                if image.mode != "RGB":
-                    image = image.convert("RGB")
-                    
-                img_io = BytesIO()
-                image.save(img_io, format="JPEG", quality=qualidade, optimize=True)
-                new_img_xref = doc.insert_image(page.rect, stream=img_io.getvalue())
-                
-                # Remove a imagem antiga
-                doc._delete_object(xref)
-                
+
+        if reduzir_imagem:
+            print("Reduzindo qualidade das imagens...")
+            for page_num in range(len(doc)):
+                page = doc[page_num]
+                images = page.get_images(full=True)
+                for img in images:
+                    xref = img[0]
+                    base_image = doc.extract_image(xref)
+                    image_bytes = base_image["image"]
+
+                    image = Image.open(BytesIO(image_bytes))
+                    if image.mode != "RGB":
+                        image = image.convert("RGB")
+
+                    img_io = BytesIO()
+                    image.save(img_io, format="JPEG", quality=qualidade, optimize=True)
+                    new_img_xref = doc.insert_image(page.rect, stream=img_io.getvalue())
+                    doc._delete_object(xref)  # remove imagem antiga
+
         doc.save(output_path, deflate=True, garbage=4)
-        print(f"Arquivo comprimido com sucesso em: {output_path}")
+
+        tamanho_original = os.path.getsize(file_path)
+        tamanho_final = os.path.getsize(output_path)
+
+        if tamanho_final >= tamanho_original:
+            print("⚠️ Compressão não resultou em redução de tamanho.")
+        else:
+            print("✅ Compressão realizada com sucesso!")
+
     except Exception as e:
         print(f"Erro na compressão: {str(e)}")
