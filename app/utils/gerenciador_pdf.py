@@ -49,7 +49,7 @@ class GerenciadorPdf(QWidget):
         self.layout.addWidget(self.merge_button)
 
         
-        # Checkbo para reduzir imagem
+        # Checkbox para reduzir imagem
         self.checkbox_reduzir_imagem = QCheckBox("Reduzir qualidade das imagens", self)
         self.layout.addWidget(self.checkbox_reduzir_imagem)
         
@@ -75,6 +75,7 @@ class GerenciadorPdf(QWidget):
         self.botao_renomear_arquivos.clicked.connect(self.renomear_arquivos)
         self.layout.addWidget(self.botao_renomear_arquivos)
 
+    """ Selecionar arquivos """
     def selecionar_arquivos(self):
         files, _ = QFileDialog.getOpenFileNames(
             self, "Selecionar Arquivos", "", "All Files (*);;PDF Files (*.pdf)"
@@ -88,11 +89,13 @@ class GerenciadorPdf(QWidget):
                 item.setData(Qt.ItemDataRole.UserRole, (file, page_count))
                 self.lista_arquivos.addItem(item)
 
+    """ Função para obter o número de páginas de um PDF """
     def get_pdf_page_count(self, pdf_path):
         with open(pdf_path, 'rb') as f:
             pdf = PdfReader(f)
             return len(pdf.pages)
 
+    """ Comprimir PDF """
     def compress_pdf(self):
         if self.lista_arquivos.count() == 0:
             QMessageBox.warning(self, "Erro", "Nenhum PDF selecionado.")
@@ -149,7 +152,8 @@ class GerenciadorPdf(QWidget):
 
         except Exception as e:
             QMessageBox.critical(self, "Erro", f"Erro ao comprimir PDF: {str(e)}")
-    
+            
+    """ Remover Paginas """
     def remove_page(self):
         selected_item = self.lista_arquivos.currentItem()
         if selected_item:
@@ -192,6 +196,7 @@ class GerenciadorPdf(QWidget):
                 QMessageBox.warning(
                     self, "Erro", "Por favor, insira números de página válidos separados por vírgula.")
 
+    """ Dividir PDFs"""
     def dividir_pdfs(self):
         print("Função dividir PDF foi chamada...")
         pasta_saida = QFileDialog.getExistingDirectory(
@@ -216,6 +221,7 @@ class GerenciadorPdf(QWidget):
             QMessageBox.information(
                 self, "Sucesso", "Os PDFs foram divididos com sucesso!")
 
+    """ Mesclar PDFs """
     def merge_pdfs(self):
         pasta_saida = QFileDialog.getExistingDirectory(
             self, "Selecionar Pasta de Saída")
@@ -235,6 +241,7 @@ class GerenciadorPdf(QWidget):
             QMessageBox.information(
                 self, "Sucesso", "Os PDFs foram mesclados com sucesso!")
 
+    """ Renomear PDFs """
     def renomear_arquivos(self):
         arquivo_nomes, _ = QFileDialog.getOpenFileName(
             self, "Selecionar Arquivo de Nomes", "", "Text Files (*.txt)")
