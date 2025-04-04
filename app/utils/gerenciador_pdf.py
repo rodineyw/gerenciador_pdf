@@ -1,5 +1,7 @@
 import os
+
 from PyPDF2 import PdfReader, PdfWriter
+from PyPDF2.errors import PdfReadError
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QListWidget,
@@ -91,68 +93,137 @@ class GerenciadorPdf(QWidget):
 
     """ Função para obter o número de páginas de um PDF """
     def get_pdf_page_count(self, pdf_path):
-        with open(pdf_path, 'rb') as f:
-            pdf = PdfReader(f)
-            return len(pdf.pages)
+        try:
+            with open(pdf_path, 'rb') as f:
+                pdf = PdfReader(f)
+                return len(pdf.pages)
+        except PdfReadError:
+            print(f"Aviso: PyPDF2 falhou ao ler {pdf_path}. Tentando com FItz...")
+            try:
+                import fitz
+                doc = fitz.open(pdf_path)
+                count = len(doc)
+                doc.close()
+                return count
+            except Exception as e:
+                print(f"Erro ao contar páginas de {pdf_path} com Fitz: {e}")
+                return 0
+        except FileNotFoundError:
+            print(f"Erro: Arquivo não encontrado {pdf_path}")
+            return 0
+        except Exception as e:
+            print(f"Erro inesperado ao contar páginas de {pdf_path}: {e}")
+            return 0
 
     """ Comprimir PDF """
     def compress_pdf(self):
         if self.lista_arquivos.count() == 0:
-            QMessageBox.warning(self, "Erro", "Nenhum PDF selecionado.")
+            QMessageBox.warning(self, "Atenção", "Nenhum PDF selecionado.")
             return
 
         selected_item = self.lista_arquivos.currentItem()
         if not selected_item:
-            QMessageBox.warning(self, "Erro", "Selecione um arquivo PDF da lista.")
+            QMessageBox.warning(self, "Atenção", "Selecione um arquivo PDF da lista.")
             return
 
-        pdf_path = selected_item.data(Qt.ItemDataRole.UserRole)[0]
+        pdf_path, _ = selected_item.data(Qt.ItemDataRole.UserRole)[0]
+        
+        # garante que é um PDF antes de prosseguir
+        if not pdf_path.lower().endswith(".pdf"):
+            QMesssageBox.critical(self, "Erro", f"O arquivo '{os.path.basename(pdf_path)}' não parece ser um PDF válido.")
+            return
 
         save_path, _ = QFileDialog.getSaveFileName(
-            self, "Salvar PDF Comprimido", "", "PDF Files (*.pdf)"
+            self, "Salvar PDF Comprimido como...", os.path.basename(pdf_path).replace(".pdf", "_comprimido.pdf"), "PDF Files (*.pdf)"
         )
 
         if not save_path:
-            QMessageBox.warning(self, "Cancelado", "Ação de salvar foi cancelada.")
+            QMessageBox.warning(self, "Cancelado", "Salvamento cancelado pelo usuário.")
             return
+        
+        # Garante que o nome de saída também tenha .pdf
+        if not save_path.lower().endswith(".pdf"):
+            save_path += ".pdf"
 
         reduzir = self.checkbox_reduzir_imagem.isChecked()
+        qualidade_img = self.slider_qualidade.value()
 
         try:
+            # Mostra uma indicação de que está trabalhando
+            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+            self.progress_bar.setRange(0, 0)
+            
+            print(f"Tentando comprimir: {pdf_path}")
+            print(f"Salvar em: {save_path}")
+            print(f"Reduzir imagens: {reduzir}, Qualidade: {qualidade_img}")
+            
+            # Chama a função de compressão do pdf_utils.py
             original, final = comprimir_pdf(
                 file_path=pdf_path,
                 output_path=save_path,
                 reduzir_imagem=reduzir,
-                qualidade=self.slider_qualidade.value()
-
+                qualidade=qualidade_img
             )
-
-            if original is None or final is None:
-                raise Exception("Falha ao comprimir PDF")
-
-            original_mb = original / (1024 * 1024)
-            final_mb = final / (1024 * 1024)
-            diff = original_mb - final_mb
-
-            if diff <= 0:
-                QMessageBox.warning(
-                    self, "Aviso",
-                    f"O tamanho do PDF não foi reduzido.\n"
-                    f"Tamanho original: {original_mb:.2f} MB\n"
-                    f"Tamanho final: {final_mb:.2f} MB"
-                )
-            else:
-                QMessageBox.information(
-                    self, "Sucesso",
-                    f"PDF comprimido com sucesso!\n"
-                    f"Tamanho original: {original_mb:.2f} MB\n"
-                    f"Tamanho final: {final_mb:.2f} MB\n"
-                    f"Redução: {diff:.2f} MB"
-                )
-
-        except Exception as e:
-            QMessageBox.critical(self, "Erro", f"Erro ao comprimir PDF: {str(e)}")
             
+            # Restaura o cursor e a barra de progresso
+            QApplication.restoreOverrideCursor()
+            self.progress_bar.setRange(0, 1)
+            self.progress_bar.setValue(0)
+
+            if final is not None:
+                original_mb = original / (1024 * 1024)
+                final_mb = final / (1024 * 1024)
+                
+                if final >= original:
+                    print(f"Compressão ineficaz ou aumentou o tamanho. Original: {original_mb:.2f} MB, Final: {final_mb:.2f} MB")
+                    QMessageBox.warning(
+                        self, "Compressão Ineficaz",
+                        f"A compressão não reduziu o tamanho do arquivo (ou até aumentou).\n"
+                        f"Tamanho original: {original_mb:.2f} MB\n"
+                        f"Tamanho 'comprimido': {final_mb:.2f} MB\n\n"
+                        f"O arquivo maior foi descartado. Nenhuma alteração foi salva."
+                    )
+                    
+                    try:
+                        os.remove(save_path)
+                        print(f"Arquivo maior descartado: {save_path}")
+                    except OSError as e:
+                        print(f"Erro ao tentar deletar o arquivo maior '{save_path}': {e}")
+                        QMessageBox.critical(self, "Erro", f"Não foi possivel deletar o arquivo maior gerado:\n{save_path}\n\nErro: {e}")
+                else:
+                    diff = original_mb - final_mb
+                    print(f"Compressão bem-sucedida! Redução: {diff:.2f} MB")
+                    QMessageBox.information(
+                        self, "Sucesso",
+                        f"PDF comprimido e salvo com sucesso!\n"
+                        f"Tamanho original: {original_mb:.2f} MB\n"
+                        f"Tamanho final: {final_mb:.2f} MB\n"
+                        f"Redução: {diff:.2f} MB"
+                        f"Salvo em: {save_path}"
+                    )
+            else:
+                QMessageBox.critical(self, "Erro na compressão",
+                                     "Ocorreu um erro interno durante a tentativa de compressão. Veja o console para detalhes.\n"
+                                     f"O arquivo de saída '{save_path}' pode não ter sido criado ou estar incmpleto.")
+                if os.path.exists(save_path):
+                    try:
+                        os.remove(save_path)
+                    except OSError:
+                        pass
+        except Exception as e:
+            QApplecation.restoreOverrideCursor()
+            self.progress_bar.setRange(0, 1)
+            self.progress_barsetValue(0)
+            print(f"Erro GERAL na função compress_pdf (gerenciador_pdf.py): {e}")
+            import traceback
+            traceback.print_exc()
+            QMessageBox.critical(self, "Erro Inesperado", f"Ocorreu um erro inesperado ao tentar comprimir:\n{str(e)}")
+            if 'save_path' in locals() and os.path.exists(save_path):
+                try:
+                    os.remove(save_path)
+                except OSError:
+                    pass
+                                
     """ Remover Paginas """
     def remove_page(self):
         selected_item = self.lista_arquivos.currentItem()
