@@ -3,7 +3,7 @@ from cx_Freeze import setup, Executable
 
 # Adicionar pacotes e incluir arquivos adicionais
 build_exe_options = {
-    "packages": ["os", "sys", "fitz", "PyQt6", "pandas", "numpy", "PyPDF2"],
+    "packages": ["os", "sys", "fitz", "PyQt6", "pandas", "numpy", "PyPDF2", "PyMuPDF"],
     "includes": [
         "app.utils.pdf_utils",
         "app.utils.gerenciador_pdf",
@@ -12,8 +12,8 @@ build_exe_options = {
 }
 
 base = None
-# if sys.platform == "win32":
-#     base = "Win32GUI"
+if sys.platform == "win32":
+    base = "Win32GUI"
 
 setup(
     name="Gerenciador PDF",
