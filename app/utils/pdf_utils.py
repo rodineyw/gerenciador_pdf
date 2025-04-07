@@ -1,8 +1,8 @@
 import os
 import fitz
-
-from PIL import Image
-from io import BytesIO
+import subprocess
+import shutil
+import platform
 
 
 def dividir_pdf(caminho_arquivo, pasta_saida, paginas_por_arquivo=2):
@@ -105,84 +105,114 @@ def renomear_com_texto(lista_arquivos, arquivo_nomes):
         print(f"Erro ao renomear arquivos: {str(e)}")
 
 
-def comprimir_pdf(file_path, output_path, reduzir_imagem=False, qualidade=75):
+
+def comprimir_pdf_ghostscript(file_path, output_path, quality_preset='/ebook'):
+    """
+    Comprime um PDF usando Ghostscript.
+
+    Args:
+        file_path (str): Caminho do PDF original.
+        output_path (str): Caminho para salvar o PDF comprimido.
+        quality_preset (str): Preset de qualidade do Ghostscript.
+                               Opções comuns: '/screen', '/ebook', '/printer', '/prepress'.
+                               '/ebook' é um bom equilíbrio padrão.
+
+    Returns:
+        tuple: (tamanho_original, tamanho_final) se sucesso, (tamanho_original, None) se erro.
+               Retorna (None, None) se o arquivo de entrada for inválido.
+    """
     tamanho_original = None
+    gs_executable = None
+
     try:
-        # verifica se o arquivo de entrada existe e tem o tamanho > 0
+        # --- Validação do Arquivo de Entrada ---
         if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
-            print(f"[ERRO] Arquivo de entrada não encontrado ou vazio: {file_path}")
+            print(f"[ERRO GS] Arquivo de entrada não encontrado ou vazio: {file_path}")
             return None, None
-        
         tamanho_original = os.path.getsize(file_path)
         print(f"Tamanho original: {tamanho_original} bytes")
-        
-        doc = fitz.open(file_path)
-        algo_foi_feito = False
 
-        if reduzir_imagem:
-            print(f"Tentando reduzir imagens com qualidade JPEG: {qualidade}")
-            for page_num in range(len(doc)):
-                page = doc.load_page(page_num)
-                images = page.get_images(full=True)
-                if images:
-                    print(f" Processando {len(images)} imagens na página {page_num + 1}")
-                for img_index, img in enumerate(images):
-                    xref = img[0]
-                    try:
-                        base_image = doc.extract_image(xref)
-                        image_bytes = base_image["image"]
-                        img_original_size = len(image_bytes)
-                        print(f"   Imagem {img_index +1} (xref {xref}): {base_image['width']}x{base_image['height']}, formato original: {base_image['ext']}, tamanho original: {img_original_size} bytes")
-                        
-                        image = Image.open(BytesIO(image_bytes))
-                        
-                        if image.mode in ("RGBA", "P", "LA"):
-                            print(f" Convertendo imagem de {image.mode} para RGB (pode perder transparência)")
-                            image = image.convert("RGB")
-                        elif image.mode == "CMYK":
-                            print(f" Convertendo imagem de {image.mode} para RGB")
-                            image = image.convert("RGB")
+        # --- Encontrar o Executável do Ghostscript ---
+        system = platform.system()
+        if system == "Windows":
+            # Tenta encontrar gswin64c.exe (64 bits) ou gswin32c.exe (32 bits) no PATH
+            gs_executable = shutil.which("gswin64c.exe") or shutil.which("gswin32c.exe")
+            if not gs_executable:
+                 # Se não estiver no PATH, tenta caminhos comuns (AJUSTE SE NECESSÁRIO)
+                 common_paths = [
+                     "C:\\Program Files\\gs\\gs10.03.1\\bin\\gswin64c.exe", # Exemplo, versão pode mudar!
+                     "C:\\Program Files (x86)\\gs\\gs10.03.1\\bin\\gswin32c.exe" # Exemplo
+                 ]
+                 for path in common_paths:
+                     if os.path.exists(path):
+                         gs_executable = path
+                         break
+        else: # Linux ou macOS
+            gs_executable = shutil.which("gs")
 
-                        img_io = BytesIO()
-                        
-                        image.save(img_io, format="JPEG", quality=qualidade, optimize=True, progressive=True)
-                        img_nova_size = img_io.tell()
-                        
-                        print(f" Imagem re-comprimida como JPEG q={qualidade}: {img_nova_size} bytes")
-                        
-                        if img_nova_size > 0:
-                            doc.update_stream(xref, img_io.getValue())
-                            print(f" Imagem xref {xref} atualizada no PDF.")
-                            algo_foi_feito = True
-                        else:
-                            print(f" [AVISO] Stream da imagem re-comprimida ficou vazio. Imagem xref {xref} não atualizado.")
-                            
-                    except Exception as img_error:
-                        print(f" [!] Erro ao processar imagem xref {xref}: {img_error}. Pulando esta imagem.")
-                        return
-        
-        print("Salvando PDF com opções: deflate=True, garbage=4, clean=True")
-        doc.save(output_path, garbage=4, deflate=True, clean=True)
-        doc.close()
-        algo_foi_feito = True
-        
-        tamanho_final = os.path.getsize(output_path)
-        print(f"Tamanho final: {tamanho_final} bytes")
-        
-        return tamanho_original, tamanho_final
-    
+        if not gs_executable:
+            print("[ERRO GS] Executável do Ghostscript não encontrado.")
+            print("Verifique se o Ghostscript está instalado e no PATH do sistema.")
+            # Retorna erro, mas com tamanho original pra interface poder comparar depois se quiser
+            return tamanho_original, None
+
+        print(f"Usando Ghostscript: {gs_executable}")
+        print(f"Preset de qualidade: {quality_preset}")
+
+        # --- Montar o Comando Ghostscript ---
+        # Referência: https://ghostscript.readthedocs.io/en/latest/Use.html#pdfwrite-parameters
+        command = [
+            gs_executable,
+            "-sDEVICE=pdfwrite",         # Saída será PDF
+            "-dCompatibilityLevel=1.4",  # Nível de compatibilidade (pode ajustar)
+            f"-dPDFSETTINGS={quality_preset}", # Preset de qualidade/compressão
+            "-dNOPAUSE",                 # Não pausar entre páginas
+            "-dBATCH",                   # Sair após processar o arquivo
+            "-dQUIET",                   # Suprimir mensagens normais (erros ainda aparecem)
+            # "-dDetectDuplicateImages=true", # Tenta detectar e compartilhar imagens duplicadas (pode ajudar)
+            # "-dCompressFonts=true",       # Tenta comprimir fontes
+            # "-dDownsampleColorImages=true", # Habilita downsampling (controlado pelo PDFSETTINGS)
+            # "-dColorImageResolution=150", # Exemplo: define resolução se downsampling ativo (padrão varia com preset)
+            f"-sOutputFile={output_path}", # Arquivo de saída
+            file_path                    # Arquivo de entrada
+        ]
+
+        print(f"Executando comando: {' '.join(command)}") # Mostra o comando no console
+
+        # --- Executar o Comando ---
+        # Usamos Popen para ter mais controle e capturar stdout/stderr se necessário
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        stdout, stderr = process.communicate() # Espera o processo terminar
+
+        # --- Verificar Resultado ---
+        if process.returncode == 0:
+            # Sucesso! Verifica o tamanho final
+            if os.path.exists(output_path):
+                tamanho_final = os.path.getsize(output_path)
+                print(f"Ghostscript finalizado com sucesso. Tamanho final: {tamanho_final} bytes")
+                return tamanho_original, tamanho_final
+            else:
+                print("[ERRO GS] Ghostscript finalizou sem erros, mas o arquivo de saída não foi encontrado.")
+                return tamanho_original, None
+        else:
+            # Erro! Imprime a saída de erro do Ghostscript
+            print(f"[ERRO GS] Ghostscript falhou com código de saída: {process.returncode}")
+            if stderr:
+                print("--- Saída de Erro do Ghostscript ---")
+                print(stderr)
+                print("------------------------------------")
+            if stdout: # Às vezes infos úteis vão pro stdout mesmo com -dQUIET
+                 print("--- Saída Padrão do Ghostscript ---")
+                 print(stdout)
+                 print("-----------------------------------")
+            return tamanho_original, None # Indica falha
+
     except Exception as e:
-        print(f"[ERRO FATAL] Falha na compressão PDF '{file_path}': {e}")
+        print(f"[ERRO FATAL Python] Falha ao tentar usar Ghostscript: {e}")
         import traceback
         traceback.print_exc()
-        
-        if 'output_path' is locals() and os.path.exists(output_path):
-            try:
-                if 'doc' in locals() and doc.is_open:
-                    doc.close()
-                os.remove(output_path)
-                print(f"Arquivo de saída incompleto '{output_path}' removido devido a erro.")
-            except Exception as cleanup_error:
-                print(f"Erro adicional ao tentar limpar '{output_path}': {cleanup_error}")
-                
-        return tamanho_original, None
+        # Retorna None no final para indicar erro fatal, mas mantém original se já foi lido
+        return tamanho_original if tamanho_original is not None else None, None
+
+    # Não deveria chegar aqui, mas por segurança:
+    return tamanho_original, None

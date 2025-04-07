@@ -5,9 +5,9 @@ from PyPDF2.errors import PdfReadError
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QLabel, QListWidget,
-    QFileDialog, QMessageBox, QProgressBar, QApplication, QLineEdit, QListWidgetItem, QInputDialog, QCheckBox, QSlider
+    QFileDialog, QMessageBox, QProgressBar, QApplication, QLineEdit, QListWidgetItem, QInputDialog, QCheckBox, QSlider, QComboBox
 )
-from .pdf_utils import dividir_pdf, mesclar_pdfs, renomear_com_texto, comprimir_pdf
+from .pdf_utils import dividir_pdf, mesclar_pdfs, renomear_com_texto, comprimir_pdf_ghostscript
 
 
 class GerenciadorPdf(QWidget):
@@ -52,22 +52,36 @@ class GerenciadorPdf(QWidget):
 
         
         # Checkbox para reduzir imagem
-        self.checkbox_reduzir_imagem = QCheckBox("Reduzir qualidade das imagens", self)
-        self.layout.addWidget(self.checkbox_reduzir_imagem)
+        # self.checkbox_reduzir_imagem = QCheckBox("Reduzir qualidade das imagens", self)
+        # self.layout.addWidget(self.checkbox_reduzir_imagem)
         
-        # Slider para escolher a qualidade
-        self.slider_qualidade = QSlider(Qt.Orientation.Horizontal)
-        self.slider_qualidade.setMinimum(10)
-        self.slider_qualidade.setMaximum(95)
-        self.slider_qualidade.setValue(75)
-        self.slider_qualidade.setTickInterval(5)
-        self.slider_qualidade.setTickPosition(QSlider.TickPosition.TicksBelow)
-        self.layout.addWidget(QLabel("Qualidade das imagens (quanto menor, mais comprimido):"))
-        self.layout.addWidget(self.slider_qualidade)
+        # # Slider para escolher a qualidade
+        # self.slider_qualidade = QSlider(Qt.Orientation.Horizontal)
+        # self.slider_qualidade.setMinimum(10)
+        # self.slider_qualidade.setMaximum(95)
+        # self.slider_qualidade.setValue(75)
+        # self.slider_qualidade.setTickInterval(5)
+        # self.slider_qualidade.setTickPosition(QSlider.TickPosition.TicksBelow)
+        # self.layout.addWidget(QLabel("Qualidade das imagens (quanto menor, mais comprimido):"))
+        # self.layout.addWidget(self.slider_qualidade)
 
+        # Widgets de compressão com ghostscript
+        self.layout.addWidget(QLabel("Opções de compressão:", self))
+        
+        # Presets ghostscript
+        self.combo_preset_gs = QComboBox(self)
+        
+        self.combo_preset_gs.addItem("Tela (Menor Tamanho, Baixa Qualidade)", "/screen")
+        self.combo_preset_gs.addItem("Ebook (Bom Equilíbrio)", "/ebook")
+        self.combo_preset_gs.addItem("Impressão (Alta Qualidade)", "/printer")
+        self.combo_preset_gs.addItem("Pré-impressão (Qualidade Máxima, Maior Tamanho)", "/prepress")
+        self.combo_preset_gs.addItem("Padrão", "/default")
+        # Define o 'Ebook' como padrão inicial
+        self.combo_preset_gs.setCurrentIndex(1) # Índice 1 corresponde a '/ebook'
+        self.layout.addWidget(self.combo_preset_gs)
         
         # Botão de compressão
-        self.compress_button = QPushButton('Comprimir e Salvar', self)
+        self.compress_button = QPushButton('Comprimir e Salvar PDF selecionado', self)
         self.compress_button.clicked.connect(self.compress_pdf)
         self.layout.addWidget(self.compress_button)
 
@@ -115,114 +129,124 @@ class GerenciadorPdf(QWidget):
             print(f"Erro inesperado ao contar páginas de {pdf_path}: {e}")
             return 0
 
-    """ Comprimir PDF """
+    """ Comprimir PDF (Agora usando Ghostscript) """
     def compress_pdf(self):
+        # --- Validação inicial (igual antes) ---
         if self.lista_arquivos.count() == 0:
             QMessageBox.warning(self, "Atenção", "Nenhum PDF selecionado.")
             return
-
         selected_item = self.lista_arquivos.currentItem()
         if not selected_item:
-            QMessageBox.warning(self, "Atenção", "Selecione um arquivo PDF da lista.")
+            QMessageBox.warning(self, "Atenção", "Selecione um arquivo da lista.")
             return
+        # ... (Validação do pdf_path - igual antes) ...
+        pdf_path_data = selected_item.data(Qt.ItemDataRole.UserRole)
+        if not isinstance(pdf_path_data, tuple) or len(pdf_path_data) == 0:
+             QMessageBox.critical(self, "Erro Interno", "Não foi possível obter o caminho do arquivo selecionado.")
+             print(f"Erro: Dado inesperado para o item selecionado: {pdf_path_data}")
+             return
+        pdf_path = pdf_path_data[0]
+        if not isinstance(pdf_path, str) or not pdf_path.lower().endswith(".pdf"):
+             QMessageBox.critical(self, "Erro", f"O arquivo '{os.path.basename(str(pdf_path))}' não parece ser um PDF válido.")
+             return
 
-        pdf_path, _ = selected_item.data(Qt.ItemDataRole.UserRole)[0]
-        
-        # garante que é um PDF antes de prosseguir
-        if not pdf_path.lower().endswith(".pdf"):
-            QMesssageBox.critical(self, "Erro", f"O arquivo '{os.path.basename(pdf_path)}' não parece ser um PDF válido.")
-            return
-
+        # --- Diálogo de Salvar (igual antes) ---
+        default_save_name = os.path.basename(pdf_path).replace(".pdf", "_comprimido_gs.pdf") # Mudei sufixo
         save_path, _ = QFileDialog.getSaveFileName(
-            self, "Salvar PDF Comprimido como...", os.path.basename(pdf_path).replace(".pdf", "_comprimido.pdf"), "PDF Files (*.pdf)"
+            self, "Salvar PDF Comprimido (Ghostscript)", default_save_name, "PDF Files (*.pdf)"
         )
-
         if not save_path:
-            QMessageBox.warning(self, "Cancelado", "Salvamento cancelado pelo usuário.")
+            print("Salvamento cancelado pelo usuário.")
             return
-        
-        # Garante que o nome de saída também tenha .pdf
         if not save_path.lower().endswith(".pdf"):
             save_path += ".pdf"
 
-        reduzir = self.checkbox_reduzir_imagem.isChecked()
-        qualidade_img = self.slider_qualidade.value()
+        # **** PEGA O PRESET DO GHOSTSCRIPT SELECIONADO ****
+        selected_preset = self.combo_preset_gs.currentData() # Pega o dado interno ('/ebook', etc.)
 
         try:
-            # Mostra uma indicação de que está trabalhando
+            # --- Feedback Visual (igual antes) ---
             QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-            self.progress_bar.setRange(0, 0)
-            
-            print(f"Tentando comprimir: {pdf_path}")
+            self.progress_bar.setRange(0, 0) # Indeterminado, GS não dá progresso fácil
+
+            print(f"Tentando comprimir com Ghostscript: {pdf_path}")
+            print(f"Preset: {selected_preset}")
             print(f"Salvar em: {save_path}")
-            print(f"Reduzir imagens: {reduzir}, Qualidade: {qualidade_img}")
-            
-            # Chama a função de compressão do pdf_utils.py
-            original, final = comprimir_pdf(
+
+            # **** CHAMA A NOVA FUNÇÃO DO PDF_UTILS ****
+            original, final = comprimir_pdf_ghostscript(
                 file_path=pdf_path,
                 output_path=save_path,
-                reduzir_imagem=reduzir,
-                qualidade=qualidade_img
+                quality_preset=selected_preset
             )
-            
-            # Restaura o cursor e a barra de progresso
+
+            # --- Restaura Feedback Visual (igual antes) ---
             QApplication.restoreOverrideCursor()
             self.progress_bar.setRange(0, 1)
             self.progress_bar.setValue(0)
 
-            if final is not None:
+            # --- Lógica de resultado (quase igual, ajusta mensagem se falhou) ---
+            if final is not None: # Ghostscript retornou tamanho final (pode ter tido erro antes)
+                 # Verifica se original também foi obtido (GS pode falhar antes de ler o original)
+                if original is None:
+                     QMessageBox.critical(self, "Erro",
+                                         "Não foi possível ler o tamanho do arquivo original.")
+                     return # Sai se não tem tamanho original
+
                 original_mb = original / (1024 * 1024)
                 final_mb = final / (1024 * 1024)
-                
+
                 if final >= original:
-                    print(f"Compressão ineficaz ou aumentou o tamanho. Original: {original_mb:.2f} MB, Final: {final_mb:.2f} MB")
+                    print(f"Compressão GS ineficaz ou aumentou tamanho. Original: {original_mb:.2f} MB, Final: {final_mb:.2f} MB")
                     QMessageBox.warning(
                         self, "Compressão Ineficaz",
-                        f"A compressão não reduziu o tamanho do arquivo (ou até aumentou).\n"
+                        f"A compressão com Ghostscript (preset: {selected_preset}) "
+                        f"não reduziu o tamanho do arquivo (ou até aumentou!).\n"
                         f"Tamanho original: {original_mb:.2f} MB\n"
-                        f"Tamanho 'comprimido': {final_mb:.2f} MB\n\n"
-                        f"O arquivo maior foi descartado. Nenhuma alteração foi salva."
+                        f"Tamanho final: {final_mb:.2f} MB\n\n"
+                        f"O arquivo maior foi descartado."
                     )
-                    
                     try:
                         os.remove(save_path)
                         print(f"Arquivo maior descartado: {save_path}")
                     except OSError as e:
-                        print(f"Erro ao tentar deletar o arquivo maior '{save_path}': {e}")
-                        QMessageBox.critical(self, "Erro", f"Não foi possivel deletar o arquivo maior gerado:\n{save_path}\n\nErro: {e}")
+                        print(f"Erro ao tentar deletar arquivo maior '{save_path}': {e}")
+                        QMessageBox.critical(self, "Erro", f"Não foi possível deletar arquivo maior gerado:\n{save_path}\n\nErro: {e}")
                 else:
                     diff = original_mb - final_mb
-                    print(f"Compressão bem-sucedida! Redução: {diff:.2f} MB")
+                    reduction_percent = ((original - final) / original * 100) if original > 0 else 0
+                    print(f"Compressão GS bem-sucedida! Redução: {diff:.2f} MB")
                     QMessageBox.information(
-                        self, "Sucesso",
-                        f"PDF comprimido e salvo com sucesso!\n"
+                        self, "Sucesso!",
+                        f"PDF comprimido com Ghostscript (preset: {selected_preset})!\n"
                         f"Tamanho original: {original_mb:.2f} MB\n"
                         f"Tamanho final: {final_mb:.2f} MB\n"
-                        f"Redução: {diff:.2f} MB"
+                        f"Redução: {diff:.2f} MB ({reduction_percent:.1f}%)\n\n"
                         f"Salvo em: {save_path}"
                     )
             else:
-                QMessageBox.critical(self, "Erro na compressão",
-                                     "Ocorreu um erro interno durante a tentativa de compressão. Veja o console para detalhes.\n"
-                                     f"O arquivo de saída '{save_path}' pode não ter sido criado ou estar incmpleto.")
-                if os.path.exists(save_path):
-                    try:
-                        os.remove(save_path)
-                    except OSError:
-                        pass
-        except Exception as e:
-            QApplecation.restoreOverrideCursor()
+                 # Se final é None, significa que comprimir_pdf_ghostscript falhou
+                 error_msg = "Ocorreu um erro durante a compressão com Ghostscript.\n"
+                 error_msg += "Verifique se o Ghostscript está instalado e acessível (no PATH).\n"
+                 error_msg += "Consulte o console/terminal para mensagens de erro detalhadas do Ghostscript."
+                 QMessageBox.critical(self, "Erro na Compressão (Ghostscript)", error_msg)
+                 # Tenta limpar arquivo de saída incompleto
+                 if os.path.exists(save_path):
+                     try: os.remove(save_path)
+                     except OSError: pass
+
+        except Exception as e: # Erro geral no Python
+            QApplication.restoreOverrideCursor()
             self.progress_bar.setRange(0, 1)
-            self.progress_barsetValue(0)
-            print(f"Erro GERAL na função compress_pdf (gerenciador_pdf.py): {e}")
+            self.progress_bar.setValue(0)
+            print(f"Erro GERAL Python ao chamar compress_pdf (gerenciador_pdf.py): {e}")
             import traceback
             traceback.print_exc()
-            QMessageBox.critical(self, "Erro Inesperado", f"Ocorreu um erro inesperado ao tentar comprimir:\n{str(e)}")
+            QMessageBox.critical(self, "Erro Inesperado Python", f"Ocorreu um erro inesperado:\n{str(e)}")
             if 'save_path' in locals() and os.path.exists(save_path):
-                try:
-                    os.remove(save_path)
-                except OSError:
-                    pass
+                 try: os.remove(save_path)
+                 except OSError: pass
+                 
                                 
     """ Remover Paginas """
     def remove_page(self):
