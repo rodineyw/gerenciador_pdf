@@ -3,7 +3,7 @@ from cx_Freeze import setup, Executable
 
 # Adicionar pacotes e incluir arquivos adicionais
 build_exe_options = {
-    "packages": ["os", "sys", "fitz", "PyQt6", "pandas", "numpy", "PyPDF2", "PyMuPDF"],
+    "packages": ["os", "sys", "PyMuPDF", "PyQt6", "pandas", "numpy", "PyPDF2"],
     "includes": [
         "app.utils.pdf_utils",
         "app.utils.gerenciador_pdf",
