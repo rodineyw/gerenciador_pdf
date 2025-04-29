@@ -56,7 +56,7 @@ O **Gerenciador PDF** é um gerenciador completo e fácil de usar para tarefas e
 
 ## 🖥 Plataforma Windows
 
-Se você estiver no **Windows**, pode executar o aplicativo diretamente via instalador — **não é necessário instalar Python**.  
+Se você estiver no **Windows**, pode executar o aplicativo diretamente via instalador — **não é necessário instalar Python**.  Basta executar o GerenciadorPDF-Setup.exe, baise ele através do link: [GerenciadorPDF-Setup.exe](https://github.com/rodineyw/gerenciador_pdf/releases/latest/download/GerenciadorPDF-Setup.exe)
 Para desenvolvedores, também é possível rodar diretamente o código fonte.
 
 ---
