@@ -1,14 +1,18 @@
 import sys
 from cx_Freeze import setup, Executable
 
-# Adicionar pacotes e incluir arquivos adicionais
+# Pacotes adicionais para incluir
 build_exe_options = {
-    "packages": ["fitz", "PyQt6", "pandas", "numpy", "PyPDF2"],
+    "packages": ["os", "sys", "fitz", "PyQt6", "pandas", "numpy", "PyPDF2", "requests"],  # <-- requests adicionado aqui
     "includes": [
         "app.utils.pdf_utils",
         "app.utils.gerenciador_pdf",
+        "app.utils.autoatualizador"  # Se o autoatualizador está num arquivo separado
     ],
-    "include_files": ["app/resources/icons/icone_gerenciador.ico"]
+    "include_files": [
+        "app/resources/icons/icone_gerenciador.ico",
+        "gs/"  # pasta do Ghostscript, se aplicável
+    ]
 }
 
 base = None
@@ -24,8 +28,7 @@ setup(
         Executable(
             "app/main.py",
             base=base,
-            icon="app/resources/icons/icone_gerenciador.ico",
-            target_name="Gerenciador PDF.exe",
-            )
+            icon="app/resources/icons/icone_gerenciador.ico"
+        )
     ]
 )
