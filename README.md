@@ -1,68 +1,67 @@
+# Gerenciador PDF
 
-# Gerenciador de Arquivos
+Bem-vindo ao **Gerenciador PDF**, o aplicativo que vai transformar a forma como você organiza e manipula arquivos PDF!
 
-Ei, pessoal! Bem-vindos ao Gerenciador de Arquivos em Massa, o app que vai mudar a maneira como você lida com arquivos. Se você já cansou de renomear arquivos um por um, ou se precisa dar um nome especial para um monte de arquivos ao mesmo tempo, você está no lugar certo.
-
-## O Que Esse App Faz?
-
-Em resumo, ele é um renomeador de arquivos super prático. Você pode selecionar vários arquivos de uma vez e renomeá-los todos ao mesmo tempo, tudo numa interface gráfica fácil de usar. Ideal para quem trabalha com documentos, fotos, ou qualquer coisa que precise de nomes organizados.
-
-## Principais Funcionalidades
-
-- **Renomeação em Massa:** Selecione um monte de arquivos e renomeie-os com apenas alguns cliques.
-- **Dividir PDFs em PDFs separados:** Selecione um arquivo PDF e divida-os em vários arquivos PDFs, tornando o aplicativo ainda mais versátil.
-- **Mesclar PDFs em PDF unico:** Selecione diversos arquivo PDF e mescle em um uníco arquivo PDF, tornando o aplicativo ainda mais versátil.
-- **Interface Amigável:** Não precisa ser um gênio da tecnologia para usar. Tudo é simples e direto ao ponto.
-- **Defina o Destino:** Você pode escolher para onde vão os arquivos renomeados, mantendo tudo organizado.
-
-## Plataforma Windows
-
-Se você estiver no Windows, pode executar o aplicativo diretamente sem a necessidade de instalação. Basta seguir as instruções em "Como Usar" abaixo.
-
-## Como Usar
-
-Se você quer entrar nessa de renomear arquivos em massa e dividir PDFs, segue o passo a passo:
-
-1. **Clone o Repositório:** Copie o código para sua máquina local. É só fazer:
-
-   ```bash
-   git clone https://github.com/rodineyw/rename.git
-   ```
-
-2. **Tenha o Python Instalado:** O app precisa do Python para rodar. Recomendamos a versão 3.10 ou superior.
-3. **Rode o App:** Entre na pasta do projeto e execute o arquivo principal:
-
-   ```bash
-   python main.py
-   ```
-
-4. **Use a Interface:** Selecione os arquivos que quer renomear, insira os novos nomes em um arquivo .TXT pulando linhas para separar os diferentes nomes e escolha onde salvar. Para dividir PDFs, selecione os arquivos PDF que deseja dividir e escolha a pasta de saída.
-5. **Bora Renomear ou Dividir:** Agora é só clicar e ver a mágica acontecer.
-
-## Contribuições
-
-Se quiser contribuir para o projeto, ficaremos felizes! Aqui está como fazer:
-
-1. **Faça um Fork:** Clique em "Fork" no GitHub para ter sua própria cópia do repositório.
-2. **Crie uma Branch:** Faça suas alterações numa branch separada. Por exemplo:
-
-   ```bash
-   git checkout -b feature/nova-funcionalidade
-   ```
-
-3. **Commit e Push:** Faça suas alterações, depois:
-
-   ```bash
-   git commit -m 'Adicionando uma nova funcionalidade'
-   git push origin feature/nova-funcionalidade
-   ```
-
-4. **Abra um Pull Request:** No GitHub, abra um PR para que possamos revisar suas alterações.
-
-## Licença
-
-Este projeto está sob a licença MIT, o que significa que você pode usá-lo como quiser, desde que mantenha a licença intacta. Dê uma olhada no arquivo LICENSE para mais detalhes.
+Se você já cansou de:
+- Renomear arquivos manualmente
+- Dividir arquivos PDF grandes
+- Mesclar vários PDFs em um único
+- Comprimir arquivos PDF para economizar espaço
+então você está no lugar certo!
 
 ---
 
-Desenvolvido por [Ródiney Wanderson](https://github.com/rodineyw). Siga-me no [LinkedIn](https://www.linkedin.com/in/rodineyw/) para mais projetos interessantes!
+## 📚 O Que Esse App Faz?
+
+O **Gerenciador PDF** é um gerenciador completo e fácil de usar para tarefas em lote com arquivos PDF, oferecendo:
+
+- **Renomeação de arquivos em massa** usando uma lista TXT.
+- **Divisão de PDFs** em partes menores automaticamente.
+- **Mesclagem de múltiplos PDFs** em um único documento.
+- **Compressão de arquivos PDF** usando o Ghostscript para redução de tamanho.
+- **Atualização automática**: verifica, baixa e instala novas versões do app!
+- **Interface Gráfica Amigável** feita com PyQt6.
+- **Nenhuma instalação complicada**: tudo pronto para rodar no Windows.
+
+---
+
+## 🚀 Principais Funcionalidades
+
+- 📂 **Renomeação em Massa:**  
+  Selecione vários arquivos e renomeie-os com base em um arquivo `.txt` que você define.
+
+- ✂️ **Dividir PDFs:**  
+  Corte arquivos PDF em partes menores, configurando quantas páginas por novo arquivo.
+
+- 🔗 **Mesclar PDFs:**  
+  Combine vários documentos PDF em apenas um, mantendo a ordem.
+
+- 📦 **Compressão de PDFs:**  
+  Reduza o tamanho dos PDFs usando **Ghostscript**, com presets de qualidade:
+
+  | Preset       | Descrição |
+  |:-------------|:----------|
+  | /screen       | Menor tamanho, qualidade baixa |
+  | /ebook        | Equilíbrio entre qualidade e tamanho |
+  | /printer      | Alta qualidade para impressão |
+  | /prepress     | Qualidade máxima (pré-impressão) |
+  | /default      | Configurações padrão |
+
+- 🔄 **Atualizador Automático:**  
+  Ao abrir, o app pode verificar e instalar automaticamente novas versões, garantindo que você tenha sempre as últimas melhorias!
+
+---
+
+## 🖥 Plataforma Windows
+
+Se você estiver no **Windows**, pode executar o aplicativo diretamente via instalador — **não é necessário instalar Python**.  
+Para desenvolvedores, também é possível rodar diretamente o código fonte.
+
+---
+
+## 🛠 Como Usar (Desenvolvedores)
+
+1. **Clone o Repositório:**
+
+   ```bash
+   git clone https://github.com/rodineyw/gerenciador_pdf.git
