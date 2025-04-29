@@ -9,12 +9,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app.utils.gerenciador_pdf import GerenciadorPdf
 
 def main():
-    print("Iniciando aplicação...")
     app = QApplication([])
     window = GerenciadorPdf()
     window.show()
-    print("Aplicação iniciada com sucesso.")
-    app.exec()
+    sys.exit(app.exec())
 
 if __name__ == "__main__":
     try:
@@ -24,4 +22,3 @@ if __name__ == "__main__":
             f.write("Ocorreu um erro inesperado:\n")
             traceback.print_exc(file=f)
         print(f"Erro inesperado: {e}")
-    input("Pressione Enter para sair...")

@@ -20,6 +20,12 @@ setup(
     version="0.2",
     description="Gerenciador de Arquivos PDF",
     options={"build_exe": build_exe_options},
-    executables=[Executable("app/main.py", base=base,
-                            icon="app/resources/icons/icone_gerenciador.ico")]
+    executables=[
+        Executable(
+            "app/main.py",
+            base=base,
+            icon="app/resources/icons/icone_gerenciador.ico",
+            target_name="Gerenciador PDF.exe",
+            )
+    ]
 )
