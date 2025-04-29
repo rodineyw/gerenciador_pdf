@@ -3,11 +3,12 @@ from cx_Freeze import setup, Executable
 
 # Pacotes adicionais para incluir
 build_exe_options = {
-    "packages": ["os", "sys", "fitz", "PyQt6", "pandas", "numpy", "PyPDF2", "requests"],  # <-- requests adicionado aqui
+    "packages": ["os", "sys", "fitz", "PyQt6", "pandas", "numpy", "PyPDF2", "requests"], 
     "includes": [
         "app.utils.pdf_utils",
         "app.utils.gerenciador_pdf",
-        "app.utils.autoatualizador"  # Se o autoatualizador está num arquivo separado
+        "app.utils.autoatualizador",
+        "requests"
     ],
     "include_files": [
         "app/resources/icons/icone_gerenciador.ico",
