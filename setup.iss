@@ -23,7 +23,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 ; Copiar executável do seu app
-Source: "build\exe.win-amd64-3.12\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "build\exe.win-amd64-3.13\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Copiar Ghostscript junto
 Source: "gs\*"; DestDir: "{app}\gs"; Flags: ignoreversion recursesubdirs createallsubdirs
