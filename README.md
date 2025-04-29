@@ -1,8 +1,10 @@
+
 # Gerenciador PDF
 
 Bem-vindo ao **Gerenciador PDF**, o aplicativo que vai transformar a forma como você organiza e manipula arquivos PDF!
 
 Se você já cansou de:
+
 - Renomear arquivos manualmente
 - Dividir arquivos PDF grandes
 - Mesclar vários PDFs em um único
@@ -41,11 +43,11 @@ O **Gerenciador PDF** é um gerenciador completo e fácil de usar para tarefas e
 
   | Preset       | Descrição |
   |:-------------|:----------|
-  | /screen       | Menor tamanho, qualidade baixa |
-  | /ebook        | Equilíbrio entre qualidade e tamanho |
-  | /printer      | Alta qualidade para impressão |
-  | /prepress     | Qualidade máxima (pré-impressão) |
-  | /default      | Configurações padrão |
+  | screen       | Menor tamanho, qualidade baixa |
+  | ebook        | Equilíbrio entre qualidade e tamanho |
+  | printer      | Alta qualidade para impressão |
+  | prepress     | Qualidade máxima (pré-impressão) |
+  | default      | Configurações padrão |
 
 - 🔄 **Atualizador Automático:**  
   Ao abrir, o app pode verificar e instalar automaticamente novas versões, garantindo que você tenha sempre as últimas melhorias!
@@ -65,3 +67,67 @@ Para desenvolvedores, também é possível rodar diretamente o código fonte.
 
    ```bash
    git clone https://github.com/rodineyw/gerenciador_pdf.git
+   ```
+
+2. **Instale o Python 3.10 ou superior** (se ainda não tiver).
+
+3. **Instale as dependências necessárias:**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Rode o Aplicativo:**
+
+   ```bash
+   python app/main.py
+   ```
+
+5. **Aproveite a Interface Gráfica:**
+   - Selecione arquivos PDF.
+   - Escolha ações como renomear, dividir, mesclar ou comprimir.
+   - Use o botão "Verificar Atualizações" para sempre estar na última versão!
+
+---
+
+## 🤝 Contribuições
+
+Contribuições são muito bem-vindas!  
+Se quiser colaborar:
+
+1. **Fork este repositório.**
+2. **Crie uma branch de funcionalidade:**
+
+   ```bash
+   git checkout -b feature/nova-funcionalidade
+   ```
+
+3. **Commit suas mudanças:**
+
+   ```bash
+   git commit -m 'Adicionando nova funcionalidade'
+   ```
+
+4. **Push para o seu repositório:**
+
+   ```bash
+   git push origin feature/nova-funcionalidade
+   ```
+
+5. **Abra um Pull Request.**
+
+---
+
+## 📜 Licença
+
+Este projeto está sob a licença MIT — use como quiser, respeitando os termos.  
+Veja o arquivo LICENSE para mais detalhes.
+
+---
+
+## ✨ Autor
+
+Desenvolvido com ❤️ por [Ródiney Wanderson](https://github.com/rodineyw).  
+Siga-me no [LinkedIn](https://www.linkedin.com/in/rodineyw/) para mais projetos incríveis!
+
+---
