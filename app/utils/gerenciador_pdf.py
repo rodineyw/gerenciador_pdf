@@ -1,4 +1,6 @@
 import os
+import requests
+import subprocess
 
 from PyPDF2 import PdfReader, PdfWriter
 from PyPDF2.errors import PdfReadError
@@ -49,7 +51,7 @@ class GerenciadorPdf(QWidget):
         self.merge_button = QPushButton("Mesclar PDFs Selecionados", self)
         self.merge_button.clicked.connect(self.merge_pdfs)
         self.layout.addWidget(self.merge_button)
-
+    
         
         # Checkbox para reduzir imagem
         # self.checkbox_reduzir_imagem = QCheckBox("Reduzir qualidade das imagens", self)
@@ -90,6 +92,50 @@ class GerenciadorPdf(QWidget):
             "Renomear Arquivos com TXT", self)
         self.botao_renomear_arquivos.clicked.connect(self.renomear_arquivos)
         self.layout.addWidget(self.botao_renomear_arquivos)
+        
+        # Botão para verificar atualizações
+        self.botao_atualizar = QPushButton("Verificar Atualizações", self)
+        self.botao_atualizar.clicked.connect(self.atualizar_se_disponivel)
+        self.layout.addWidget(self.botao_atualizar)
+        
+    def atualizar_se_disponivel(self):
+        VERSAO_ATUAL = "0.2"  # Atualize isso conforme sua versão
+        URL_VERSAO = "https://raw.githubusercontent.com/rodineyw/gerenciador_pdf/main/gerenciadorpdf_version.txt"
+        URL_INSTALADOR = "https://github.com/rodineyw/gerenciador_pdf/releases/download/v0.2/GerenciadorPDF-Setup.exe"
+
+        try:
+            resposta = requests.get(URL_VERSAO, timeout=5)
+            versao_disponivel = resposta.text.strip()
+
+            if versao_disponivel != VERSAO_ATUAL:
+                resposta_user = QMessageBox.question(
+                    self, "Atualização Disponível",
+                    f"Nova versão {versao_disponivel} disponível.\nDeseja atualizar agora?",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                )
+                if resposta_user == QMessageBox.StandardButton.Yes:
+                    self.baixar_e_instalar(URL_INSTALADOR)
+            else:
+                QMessageBox.information(self, "Atualização", "Você já está usando a versão mais recente.")
+        except Exception as e:
+            QMessageBox.warning(self, "Erro", f"Erro ao verificar atualização:\n{str(e)}")
+
+    def baixar_e_instalar(self, url_instalador):
+        try:
+            resposta = requests.get(url_instalador, stream=True)
+            instalador_path = os.path.join(os.getenv('TEMP'), "GerenciadorPDF-Setup.exe")
+
+            with open(instalador_path, 'wb') as f:
+                for chunk in resposta.iter_content(chunk_size=8192):
+                    f.write(chunk)
+
+            subprocess.Popen([instalador_path, "/silent"], shell=True)
+            QMessageBox.information(self, "Atualização", "Atualizador iniciado. O aplicativo será fechado.")
+            QApplication.quit()
+
+        except Exception as e:
+            QMessageBox.warning(self, "Erro", f"Erro ao baixar ou iniciar instalador:\n{str(e)}")
+
 
     """ Selecionar arquivos """
     def selecionar_arquivos(self):
