@@ -43,11 +43,11 @@ O **Gerenciador PDF** é um gerenciador completo e fácil de usar para tarefas e
 
   | Preset       | Descrição |
   |:-------------|:----------|
-  | screen       | Menor tamanho, qualidade baixa |
-  | ebook        | Equilíbrio entre qualidade e tamanho |
-  | printer      | Alta qualidade para impressão |
-  | prepress     | Qualidade máxima (pré-impressão) |
-  | default      | Configurações padrão |
+  | Tela         | Menor tamanho, qualidade baixa |
+  | Ebook        | Equilíbrio entre qualidade e tamanho |
+  | Impressão    | Alta qualidade para impressão |
+  | Pré-impressão| Qualidade máxima (pré-impressão) |
+  | Padrão       | Configurações padrão |
 
 - 🔄 **Atualizador Automático:**  
   Ao abrir, o app pode verificar e instalar automaticamente novas versões, garantindo que você tenha sempre as últimas melhorias!

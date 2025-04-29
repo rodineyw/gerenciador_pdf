@@ -19,7 +19,6 @@ WizardStyle=modern
 
 [Languages]
 Name: "portuguese"; MessagesFile: "compiler:Languages\Portuguese.isl"
-Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 ; Copiar executável do seu app

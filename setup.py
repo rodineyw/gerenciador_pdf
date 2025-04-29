@@ -12,7 +12,7 @@ build_exe_options = {
     ],
     "include_files": [
         "app/resources/icons/icone_gerenciador.ico",
-        "gs/"  # pasta do Ghostscript, se aplicável
+        "gs/"
     ]
 }
 
