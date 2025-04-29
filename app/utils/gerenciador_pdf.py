@@ -99,7 +99,7 @@ class GerenciadorPdf(QWidget):
         self.layout.addWidget(self.botao_atualizar)
         
     def atualizar_se_disponivel(self):
-        VERSAO_ATUAL = "0.2"  # Atualize isso conforme sua versão
+        VERSAO_ATUAL = "0.2"  # Atualize sempre que lançar nova versão
         URL_VERSAO = "https://raw.githubusercontent.com/rodineyw/gerenciador_pdf/main/gerenciadorpdf_version.txt"
         URL_INSTALADOR = "https://github.com/rodineyw/gerenciador_pdf/releases/download/v0.2/GerenciadorPDF-Setup.exe"
 
@@ -114,11 +114,14 @@ class GerenciadorPdf(QWidget):
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
                 )
                 if resposta_user == QMessageBox.StandardButton.Yes:
-                    self.baixar_e_instalar(URL_INSTALADOR)
+                    from app.utils.autoatualizador import AutoAtualizador
+                    self.atualizador = AutoAtualizador(URL_INSTALADOR, self)
+                    self.atualizador.exec()
             else:
                 QMessageBox.information(self, "Atualização", "Você já está usando a versão mais recente.")
         except Exception as e:
             QMessageBox.warning(self, "Erro", f"Erro ao verificar atualização:\n{str(e)}")
+
 
     def baixar_e_instalar(self, url_instalador):
         try:
