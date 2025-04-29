@@ -29,6 +29,7 @@ setup(
         Executable(
             "app/main.py",
             base=base,
+            target_name="Gerenciador PDF.exe",
             icon="app/resources/icons/icone_gerenciador.ico"
         )
     ]
