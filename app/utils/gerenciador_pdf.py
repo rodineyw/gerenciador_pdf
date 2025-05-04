@@ -93,6 +93,10 @@ class GerenciadorPdf(QWidget):
         self.botao_renomear_arquivos.clicked.connect(self.renomear_arquivos)
         self.layout.addWidget(self.botao_renomear_arquivos)
         
+        self.botao_renomear_excel = QPushButton("Renomear Arquivos com Excel", self)
+        self.botao_renomear_excel.clicked.connect(self.renomear_com_excel)
+        self.layout.addWidget(self.botao_renomear_excel)
+        
         # Botão para verificar atualizações
         self.botao_atualizar = QPushButton("Verificar Atualizações", self)
         self.botao_atualizar.clicked.connect(self.atualizar_se_disponivel)
@@ -420,6 +424,11 @@ class GerenciadorPdf(QWidget):
             except Exception as e:
                 QMessageBox.warning(
                     self, "Erro", f"Ocorreu um erro ao renomear os arquivos: {str(e)}")
+                
+    def renomear_com_excel(self):
+        from .pdf_utils import renomear_com_excel
+        renomear_com_excel(self, [self.lista_arquivos.item(i) for i in range(self.lista_arquivos.count())])
+
 
 
 if __name__ == "__main__":
