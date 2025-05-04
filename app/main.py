@@ -10,7 +10,6 @@ from app.utils.gerenciador_pdf import GerenciadorPdf
 
 VERSAO_ATUAL = "1.0.4"  # Atualize aqui sempre que lançar
 
-
 def main():
     app = QApplication([])
     window = GerenciadorPdf()

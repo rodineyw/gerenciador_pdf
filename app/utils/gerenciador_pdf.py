@@ -104,9 +104,9 @@ class GerenciadorPdf(QWidget):
         self.layout.addWidget(self.botao_atualizar)
         
     def atualizar_se_disponivel(self):
-        VERSAO_ATUAL = "0.2"  # Atualize sempre que lançar nova versão
+        VERSAO_ATUAL = "1.0.4"  # Atualize sempre que lançar nova versão
         URL_VERSAO = "https://raw.githubusercontent.com/rodineyw/gerenciador_pdf/main/gerenciadorpdf_version.txt"
-        URL_INSTALADOR = "https://github.com/rodineyw/gerenciador_pdf/releases/download/v0.2/GerenciadorPDF-Setup.exe"
+        URL_INSTALADOR = "https://github.com/rodineyw/gerenciador_pdf/releases/download/v1.0.4/GerenciadorPDF-Setup.exe"
 
         try:
             resposta = requests.get(URL_VERSAO, timeout=5)
