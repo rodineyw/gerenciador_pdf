@@ -1,4 +1,5 @@
 [Setup]
+AppId={{7eece18b-e098-4cdf-aa29-8a64c73d005a}}
 AppName=Gerenciador PDF
 AppVersion=1.0.4
 AppPublisher=Ródiney Wanderson
