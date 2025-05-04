@@ -1,6 +1,6 @@
 [Setup]
 AppName=Gerenciador PDF
-AppVersion=0.2
+AppVersion=1.0.4
 AppPublisher=Ródiney Wanderson
 AppPublisherURL=https://rodineywshare.vercel.app/
 AppSupportURL=https://rodineywshare.vercel.app/
