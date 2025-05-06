@@ -40,25 +40,7 @@ Name: "desktopicon"; Description: "Criar atalho na Área de Trabalho"; GroupDesc
 
 [Registry]
 ; Adiciona o bin do Ghostscript ao PATH do usuário (sem exigir admin)
-Root: HKCU; Subkey: "Environment";
-ValueType: expandsz;
-ValueName: "Path";
-ValueData: "{olddata};{app}\gs\gs10.05.0\bin";
-Flags: preservestringtype
-
-[Code]
-procedure CurStepChanged(CurStep: TSetupStep);
-var
-  NeedsRestart: Boolean;
-begin
-  if CurStep = ssPostInstall then
-  begin
-    // Atualiza as variáveis de ambiente em tempo de execução
-    NeedsRestart := True;
-    SendMessageTimeout(HWND_BROADCAST, WM_SETTINGCHANGE, 0,
-      LongInt(PChar('Environment')), SMTO_ABORTIFHUNG, 5000, NeedsRestart);
-  end;
-end;
+Root: HKCU; Subkey: "Environment"; ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}\gs\gs10.05.0\bin"; Flags: preservestringtype
 
 [Run]
 ; Executa o programa após instalação (caso usuário aceite)
