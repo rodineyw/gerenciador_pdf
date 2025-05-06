@@ -164,8 +164,6 @@ def renomear_com_excel(widget, lista_arquivos):
         QMessageBox.critical(widget, "Erro", f"Erro ao renomear com Excel:\n{str(e)}")
 
 
-
-
 def comprimir_pdf_ghostscript(file_path, output_path, quality_preset='/ebook'):
     """
     Comprime um PDF usando Ghostscript.
@@ -200,8 +198,8 @@ def comprimir_pdf_ghostscript(file_path, output_path, quality_preset='/ebook'):
             if not gs_executable:
                  # Se não estiver no PATH, tenta caminhos comuns (AJUSTE SE NECESSÁRIO)
                  common_paths = [
-                     "C:\\Program Files\\gs\\gs10.03.1\\bin\\gswin64c.exe", # Exemplo, versão pode mudar!
-                     "C:\\Program Files (x86)\\gs\\gs10.03.1\\bin\\gswin32c.exe" # Exemplo
+                     "C:\\Program Files\\gs\\gs10.05.0\\bin\\gswin64c.exe", # Exemplo, versão pode mudar!
+                     "C:\\Program Files (x86)\\gs\\gs10.05.0\\bin\\gswin32c.exe" # Exemplo
                  ]
                  for path in common_paths:
                      if os.path.exists(path):

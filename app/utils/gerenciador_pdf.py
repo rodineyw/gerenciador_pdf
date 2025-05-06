@@ -52,21 +52,6 @@ class GerenciadorPdf(QWidget):
         self.merge_button = QPushButton("Mesclar PDFs Selecionados", self)
         self.merge_button.clicked.connect(self.merge_pdfs)
         self.layout.addWidget(self.merge_button)
-    
-        
-        # Checkbox para reduzir imagem
-        # self.checkbox_reduzir_imagem = QCheckBox("Reduzir qualidade das imagens", self)
-        # self.layout.addWidget(self.checkbox_reduzir_imagem)
-        
-        # # Slider para escolher a qualidade
-        # self.slider_qualidade = QSlider(Qt.Orientation.Horizontal)
-        # self.slider_qualidade.setMinimum(10)
-        # self.slider_qualidade.setMaximum(95)
-        # self.slider_qualidade.setValue(75)
-        # self.slider_qualidade.setTickInterval(5)
-        # self.slider_qualidade.setTickPosition(QSlider.TickPosition.TicksBelow)
-        # self.layout.addWidget(QLabel("Qualidade das imagens (quanto menor, mais comprimido):"))
-        # self.layout.addWidget(self.slider_qualidade)
 
         # Widgets de compressão com ghostscript
         self.layout.addWidget(QLabel("Opções de compressão:", self))
@@ -104,7 +89,7 @@ class GerenciadorPdf(QWidget):
         self.layout.addWidget(self.botao_atualizar)
         
     def atualizar_se_disponivel(self):
-        VERSAO_ATUAL = "1.0.4"  # Atualize sempre que lançar nova versão
+        VERSAO_ATUAL = "1.0.4" 
         URL_VERSAO = "https://raw.githubusercontent.com/rodineyw/gerenciador_pdf/main/gerenciadorpdf_version.txt"
         URL_INSTALADOR = "https://github.com/rodineyw/gerenciador_pdf/releases/download/v1.0.4/GerenciadorPDF-Setup.exe"
 
