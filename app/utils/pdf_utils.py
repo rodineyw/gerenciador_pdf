@@ -4,6 +4,7 @@ import subprocess
 import shutil
 import platform
 
+from PyPDF2 import PdfReader, PdfWriter
 
 def dividir_pdf(caminho_arquivo, pasta_saida, paginas_por_arquivo=2):
     try:
