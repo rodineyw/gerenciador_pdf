@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
 )
 from .pdf_utils import dividir_pdf, mesclar_pdfs, renomear_com_texto, comprimir_pdf_ghostscript
 
+VERSAO_ATUAL = "1.0.4"  # Atualize aqui sempre que lançar
 
 class GerenciadorPdf(QWidget):
     def __init__(self):
@@ -51,21 +52,6 @@ class GerenciadorPdf(QWidget):
         self.merge_button = QPushButton("Mesclar PDFs Selecionados", self)
         self.merge_button.clicked.connect(self.merge_pdfs)
         self.layout.addWidget(self.merge_button)
-    
-        
-        # Checkbox para reduzir imagem
-        # self.checkbox_reduzir_imagem = QCheckBox("Reduzir qualidade das imagens", self)
-        # self.layout.addWidget(self.checkbox_reduzir_imagem)
-        
-        # # Slider para escolher a qualidade
-        # self.slider_qualidade = QSlider(Qt.Orientation.Horizontal)
-        # self.slider_qualidade.setMinimum(10)
-        # self.slider_qualidade.setMaximum(95)
-        # self.slider_qualidade.setValue(75)
-        # self.slider_qualidade.setTickInterval(5)
-        # self.slider_qualidade.setTickPosition(QSlider.TickPosition.TicksBelow)
-        # self.layout.addWidget(QLabel("Qualidade das imagens (quanto menor, mais comprimido):"))
-        # self.layout.addWidget(self.slider_qualidade)
 
         # Widgets de compressão com ghostscript
         self.layout.addWidget(QLabel("Opções de compressão:", self))
@@ -93,15 +79,19 @@ class GerenciadorPdf(QWidget):
         self.botao_renomear_arquivos.clicked.connect(self.renomear_arquivos)
         self.layout.addWidget(self.botao_renomear_arquivos)
         
+        self.botao_renomear_excel = QPushButton("Renomear Arquivos com Excel", self)
+        self.botao_renomear_excel.clicked.connect(self.renomear_com_excel)
+        self.layout.addWidget(self.botao_renomear_excel)
+        
         # Botão para verificar atualizações
         self.botao_atualizar = QPushButton("Verificar Atualizações", self)
         self.botao_atualizar.clicked.connect(self.atualizar_se_disponivel)
         self.layout.addWidget(self.botao_atualizar)
         
     def atualizar_se_disponivel(self):
-        VERSAO_ATUAL = "0.2"  # Atualize sempre que lançar nova versão
+        VERSAO_ATUAL = "1.0.4" 
         URL_VERSAO = "https://raw.githubusercontent.com/rodineyw/gerenciador_pdf/main/gerenciadorpdf_version.txt"
-        URL_INSTALADOR = "https://github.com/rodineyw/gerenciador_pdf/releases/download/v0.2/GerenciadorPDF-Setup.exe"
+        URL_INSTALADOR = "https://github.com/rodineyw/gerenciador_pdf/releases/download/v1.0.4/GerenciadorPDF-Setup.exe"
 
         try:
             resposta = requests.get(URL_VERSAO, timeout=5)
@@ -420,6 +410,11 @@ class GerenciadorPdf(QWidget):
             except Exception as e:
                 QMessageBox.warning(
                     self, "Erro", f"Ocorreu um erro ao renomear os arquivos: {str(e)}")
+                
+    def renomear_com_excel(self):
+        from .pdf_utils import renomear_com_excel
+        renomear_com_excel(self, [self.lista_arquivos.item(i) for i in range(self.lista_arquivos.count())])
+
 
 
 if __name__ == "__main__":

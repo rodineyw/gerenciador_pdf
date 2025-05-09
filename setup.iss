@@ -1,6 +1,7 @@
 [Setup]
+AppId={{7eece18b-e098-4cdf-aa29-8a64c73d005a}} ; ← mantenha este AppId fixo!
 AppName=Gerenciador PDF
-AppVersion=0.2
+AppVersion=1.0.4
 AppPublisher=Ródiney Wanderson
 AppPublisherURL=https://rodineywshare.vercel.app/
 AppSupportURL=https://rodineywshare.vercel.app/
@@ -21,27 +22,26 @@ WizardStyle=modern
 Name: "portuguese"; MessagesFile: "compiler:Languages\Portuguese.isl"
 
 [Files]
-; Copiar executável do seu app
+; Inclui os arquivos do build gerado pelo cx_Freeze
 Source: "build\exe.win-amd64-3.13\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-; Copiar Ghostscript junto
+; Copia toda a estrutura do Ghostscript (incluindo bin/)
 Source: "gs\*"; DestDir: "{app}\gs"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-; Atalho no Menu Iniciar
+; Atalho no menu iniciar
 Name: "{autoprograms}\Gerenciador PDF"; Filename: "{app}\Gerenciador PDF.exe"; IconFilename: "{app}\resources\icons\icone_gerenciador.ico"
 
-; Atalho na Área de Trabalho (opcional)
+; Atalho na área de trabalho (opcional)
 Name: "{userdesktop}\Gerenciador PDF"; Filename: "{app}\Gerenciador PDF.exe"; IconFilename: "{app}\resources\icons\icone_gerenciador.ico"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "Criar atalho na Área de Trabalho"; GroupDescription: "Opções adicionais:"
 
 [Registry]
-; Adicionar Ghostscript\bin no PATH do usuário
-Root: HKCU; Subkey: "Environment"; ValueType: expandsz; ValueName: "Path"; \
-    ValueData: "{olddata};{app}\gs\bin"; Flags: preservestringtype
+; Adiciona o bin do Ghostscript ao PATH do usuário (sem exigir admin)
+Root: HKCU; Subkey: "Environment"; ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}\gs\gs10.05.0\bin"; Flags: preservestringtype
 
 [Run]
-; Mostrar mensagem de instalação concluída
+; Executa o programa após instalação (caso usuário aceite)
 Filename: "{app}\Gerenciador PDF.exe"; Description: "Executar Gerenciador PDF"; Flags: nowait postinstall skipifsilent

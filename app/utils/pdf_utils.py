@@ -3,8 +3,10 @@ import fitz
 import subprocess
 import shutil
 import platform
+import pandas as pd
 
 from PyPDF2 import PdfReader, PdfWriter
+from PyQt6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
 
 def dividir_pdf(caminho_arquivo, pasta_saida, paginas_por_arquivo=2):
     try:
@@ -104,7 +106,63 @@ def renomear_com_texto(lista_arquivos, arquivo_nomes):
                 lista_arquivos[index] = novo_caminho_arquivo
     except Exception as e:
         print(f"Erro ao renomear arquivos: {str(e)}")
+        
+        
 
+def renomear_com_excel(widget, lista_arquivos):
+    # Seleciona o arquivo Excel
+    caminho_excel, _ = QFileDialog.getOpenFileName(
+        widget, "Selecionar Arquivo Excel", "", "Excel Files (*.xlsx *.xls)")
+
+    if not caminho_excel:
+        return
+
+    try:
+        df = pd.read_excel(caminho_excel, engine="openpyxl")
+
+        if df.empty:
+            QMessageBox.warning(widget, "Erro", "O arquivo Excel está vazio.")
+            return
+
+        colunas = list(df.columns)
+        coluna_selecionada, ok = QInputDialog.getItem(
+            widget,
+            "Selecionar Coluna",
+            "Escolha a coluna com os nomes desejados:",
+            colunas,
+            0,
+            False
+        )
+
+        if not ok or not coluna_selecionada:
+            return
+
+        novos_nomes = df[coluna_selecionada].dropna().astype(str).tolist()
+
+        if len(novos_nomes) != len(lista_arquivos):
+            QMessageBox.warning(
+                widget,
+                "Erro",
+                "O número de nomes na coluna não corresponde ao número de arquivos selecionados."
+            )
+            return
+
+        for index, novo_nome in enumerate(novos_nomes):
+            item = lista_arquivos[index]
+            caminho_arquivo_original = item.data(Qt.ItemDataRole.UserRole)[0]
+            novo_caminho_arquivo = os.path.join(
+                os.path.dirname(caminho_arquivo_original),
+                novo_nome + os.path.splitext(caminho_arquivo_original)[1]
+            )
+            os.rename(caminho_arquivo_original, novo_caminho_arquivo)
+
+            # Atualiza o dado na lista
+            item.setData(Qt.ItemDataRole.UserRole, (novo_caminho_arquivo, item.data(Qt.ItemDataRole.UserRole)[1]))
+
+        QMessageBox.information(widget, "Sucesso", "Arquivos renomeados com sucesso!")
+
+    except Exception as e:
+        QMessageBox.critical(widget, "Erro", f"Erro ao renomear com Excel:\n{str(e)}")
 
 
 def comprimir_pdf_ghostscript(file_path, output_path, quality_preset='/ebook'):
@@ -141,8 +199,8 @@ def comprimir_pdf_ghostscript(file_path, output_path, quality_preset='/ebook'):
             if not gs_executable:
                  # Se não estiver no PATH, tenta caminhos comuns (AJUSTE SE NECESSÁRIO)
                  common_paths = [
-                     "C:\\Program Files\\gs\\gs10.03.1\\bin\\gswin64c.exe", # Exemplo, versão pode mudar!
-                     "C:\\Program Files (x86)\\gs\\gs10.03.1\\bin\\gswin32c.exe" # Exemplo
+                     "C:\\Program Files\\gs\\gs10.05.0\\bin\\gswin64c.exe", # Exemplo, versão pode mudar!
+                     "C:\\Program Files (x86)\\gs\\gs10.05.0\\bin\\gswin32c.exe" # Exemplo
                  ]
                  for path in common_paths:
                      if os.path.exists(path):

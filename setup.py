@@ -22,7 +22,7 @@ if sys.platform == "win32":
 
 setup(
     name="Gerenciador PDF",
-    version="0.2",
+    version="1.0.4",
     description="Gerenciador de Arquivos PDF",
     options={"build_exe": build_exe_options},
     executables=[
