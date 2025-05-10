@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app.utils.gerenciador_pdf import GerenciadorPdf
 
-VERSAO_ATUAL = "1.0.4"  # Atualize aqui sempre que lançar
+VERSAO_ATUAL = "1.1.4"  # Atualize aqui sempre que lançar
 
 def main():
     app = QApplication([])

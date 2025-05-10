@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
 )
 from .pdf_utils import dividir_pdf, mesclar_pdfs, renomear_com_texto, comprimir_pdf_ghostscript
 
-VERSAO_ATUAL = "1.0.4"  # Atualize aqui sempre que lançar
+VERSAO_ATUAL = "1.1.4"  # Atualize aqui sempre que lançar
 
 class GerenciadorPdf(QWidget):
     def __init__(self):
