@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
 )
 from .pdf_utils import dividir_pdf, mesclar_pdfs, renomear_com_texto, comprimir_pdf_ghostscript
 
-VERSAO_ATUAL = "1.1.4"  # Atualize aqui sempre que lançar
+VERSAO_ATUAL = "1.1.4"
 
 class GerenciadorPdf(QWidget):
     def __init__(self):
@@ -89,7 +89,7 @@ class GerenciadorPdf(QWidget):
         self.layout.addWidget(self.botao_atualizar)
         
     def atualizar_se_disponivel(self):
-        VERSAO_ATUAL = "1.0.4" 
+        VERSAO_ATUAL = "1.1.4" 
         URL_VERSAO = "https://raw.githubusercontent.com/rodineyw/gerenciador_pdf/main/gerenciadorpdf_version.txt"
         URL_INSTALADOR = "https://github.com/rodineyw/gerenciador_pdf/releases/download/v1.0.4/GerenciadorPDF-Setup.exe"
 
