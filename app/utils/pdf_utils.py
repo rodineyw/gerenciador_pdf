@@ -6,6 +6,7 @@ import platform
 import pandas as pd
 
 from PyPDF2 import PdfReader, PdfWriter
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
 
 def dividir_pdf(caminho_arquivo, pasta_saida, paginas_por_arquivo=2):
