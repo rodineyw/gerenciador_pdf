@@ -189,8 +189,8 @@ class GerenciadorPdf(QWidget):
              QMessageBox.critical(self, "Erro", f"O arquivo '{os.path.basename(str(pdf_path))}' não parece ser um PDF válido.")
              return
 
-        # --- Diálogo de Salvar (igual antes) ---
-        default_save_name = os.path.basename(pdf_path).replace(".pdf", "_comprimido_gs.pdf") # Mudei sufixo
+        # --- Diálogo de Salvar ---
+        default_save_name = os.path.basename(pdf_path).replace(".pdf", "_comprimido_gs.pdf") 
         save_path, _ = QFileDialog.getSaveFileName(
             self, "Salvar PDF Comprimido (Ghostscript)", default_save_name, "PDF Files (*.pdf)"
         )
@@ -204,9 +204,9 @@ class GerenciadorPdf(QWidget):
         selected_preset = self.combo_preset_gs.currentData() # Pega o dado interno ('/ebook', etc.)
 
         try:
-            # --- Feedback Visual (igual antes) ---
+            # --- Feedback Visual ---
             QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-            self.progress_bar.setRange(0, 0) # Indeterminado, GS não dá progresso fácil
+            self.progress_bar.setRange(0, 0)
 
             print(f"Tentando comprimir com Ghostscript: {pdf_path}")
             print(f"Preset: {selected_preset}")
@@ -219,18 +219,18 @@ class GerenciadorPdf(QWidget):
                 quality_preset=selected_preset
             )
 
-            # --- Restaura Feedback Visual (igual antes) ---
+            # --- Restaura Feedback Visual ---
             QApplication.restoreOverrideCursor()
             self.progress_bar.setRange(0, 1)
             self.progress_bar.setValue(0)
 
-            # --- Lógica de resultado (quase igual, ajusta mensagem se falhou) ---
+            # --- Lógica de resultado  ---
             if final is not None: # Ghostscript retornou tamanho final (pode ter tido erro antes)
                  # Verifica se original também foi obtido (GS pode falhar antes de ler o original)
                 if original is None:
                      QMessageBox.critical(self, "Erro",
                                          "Não foi possível ler o tamanho do arquivo original.")
-                     return # Sai se não tem tamanho original
+                     return 
 
                 original_mb = original / (1024 * 1024)
                 final_mb = final / (1024 * 1024)
